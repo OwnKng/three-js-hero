@@ -1,5 +1,7 @@
 import "./style.css"
 import * as THREE from "three"
+import fragmentShader from "./shaders/fragment.glsl"
+import vertexShader from "./shaders/vertex.glsl"
 
 //_ Get canvas html element
 const canvas = document.querySelector("canvas.webgl")
@@ -10,16 +12,12 @@ const sizes = {
   height: window.innerHeight,
 }
 
-//_ Load textures
-const textureLoader = new THREE.TextureLoader()
-
-const particleTexture = textureLoader.load("/textures/particles/1.png")
-
 //_ Create a scene
 const scene = new THREE.Scene()
 
 //_ Generate points
 let geometry = null
+let material = null
 
 const createParticles = (width, length) => {
   geometry = new THREE.BufferGeometry()
@@ -63,16 +61,16 @@ const createParticles = (width, length) => {
   geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3))
   geometry.computeBoundingBox()
 
-  const material = new THREE.PointsMaterial({
-    size: 0.1,
+  material = new THREE.RawShaderMaterial({
+    vertexShader,
+    fragmentShader,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
     vertexColors: true,
-    transparent: true,
-    alphaTest: 0.001,
-    alphaMap: particleTexture,
+    uniforms: {
+      uTime: { value: 0 },
+    },
   })
-
-  material.depthWrite = false
-  material.blending = THREE.AdditiveBlending
 
   return new THREE.Points(geometry, material)
 }
@@ -135,6 +133,9 @@ const clock = new THREE.Clock()
 
 const frame = () => {
   const elapsedTime = clock.getElapsedTime()
+
+  //* Update time
+  material.uniforms.uTime.value = elapsedTime
 
   //* Update controls
   camera.position.y = cursor.y + 1.5
