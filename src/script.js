@@ -100,10 +100,12 @@ const cursor = {
 }
 
 window.addEventListener("mousemove", (event) => {
+  cursor.x = event.clientX / sizes.width - 0.5
   cursor.y = event.clientY / sizes.height - 0.5
 })
 
 window.addEventListener("touchmove", (event) => {
+  cursor.x = event.touches[0].clientX / sizes.height - 0.5
   cursor.y = event.touches[0].clientY / sizes.height - 0.5
 })
 
@@ -136,6 +138,7 @@ const frame = () => {
 
   //* Update controls
   camera.position.y = cursor.y + 1.5
+  camera.position.z = cursor.x
   mesh.rotation.y = elapsedTime / 10
 
   camera.lookAt(mesh.position)
